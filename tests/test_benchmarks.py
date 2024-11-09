@@ -96,8 +96,8 @@ def evaluate_model(prediction, reference, task_type):
 
 # --- Example Usage ---
 
-# prediction = "Paris, France"
-# reference = "The Eiffel Tower is located in Paris, France."
-prediction = ["Positive", "Negative"]
-reference = ["Positive", "Positive"]
-evaluate_model(prediction, reference, 'sentiment')
+prediction = "Paris, France"
+reference = "The Eiffel Tower is located in Paris, France."
+#prediction = ["Positive", "Negative"]
+#reference = ["Positive", "Positive"]
+evaluate_model(prediction, reference, 'summarization')
