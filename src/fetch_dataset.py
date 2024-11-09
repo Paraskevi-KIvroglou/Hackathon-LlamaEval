@@ -2,6 +2,8 @@ from datasets import load_dataset
 import pandas as pd
 import json
 
+dataset_size = 100
+
 def process_sentiment_dataset(ds_name, size):
     # Load and shuffle dataset
     data = load_dataset(ds_name).shuffle(seed=42)
@@ -22,7 +24,7 @@ def process_sentiment_dataset(ds_name, size):
 
     # Convert DataFrame to JSON format
     result = df.to_dict(orient='records')
-    return json.dumps(result, indent=4)  # Convert to JSON string with pretty-printing
+    return df, json.dumps(result, indent=4)  # Convert to JSON string with pretty-printing
 
 def process_qa_dataset(ds_name, size):
     # Load and shuffle dataset
@@ -34,7 +36,7 @@ def process_qa_dataset(ds_name, size):
 
     # Convert DataFrame to JSON format
     result = df.to_dict(orient='records')
-    return json.dumps(result, indent=4)
+    return df, json.dumps(result, indent=4)
 
 def process_summarization_dataset(ds_name, ds_version, size):
     # Load and shuffle dataset
@@ -46,9 +48,9 @@ def process_summarization_dataset(ds_name, ds_version, size):
 
     # Convert DataFrame to JSON format
     result = df.to_dict(orient='records')
-    return json.dumps(result, indent=4)
+    return df, json.dumps(result, indent=4)
 
-def fetch_dataset(task_type, size = 50):
+def fetch_dataset(task_type, size = dataset_size):
     try:
         if task_type.lower() == 'qa':
             ds_name = "squad"  #TODO : trivia_qa, natural_questions, quoref
