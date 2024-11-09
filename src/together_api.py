@@ -84,8 +84,8 @@ def run_batches(dataset, model):
         time.sleep(1)  # Add a small delay between batches
 
     # Process results as needed
-    for result in results:
-        print(pretty_print_json(result['output']['choices'][0]['text']))
+    # for result in results:
+    #     print(pretty_print_json(result['output']['choices'][0]['text']))
     return results
 
 
@@ -103,6 +103,13 @@ def main():
 
     results = run_batches(dataset=dataset, model = "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo")
 
-    return results
-
+    evaluations = []
+    final_evaluation = [0,0]
+    for i in range(len(results)):
+        evaluation = benchmarks.evaluate_model(prediction=results[i]['output']['choices'][0]['text'], reference=dataset.iloc[i]['answers']['text'][0], task_type="qa")
+        evaluation = (evaluation[0] * 1 / len(results), evaluation[1] * 1 / len(results))
+        #evaluations.append(evaluation)
+        final_evaluation[0] += evaluation[0]
+        final_evaluation[1] += evaluation[1]
+    print(final_evaluation)
 main()

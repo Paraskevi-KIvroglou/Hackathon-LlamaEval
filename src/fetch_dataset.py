@@ -10,8 +10,8 @@ def process_sentiment_dataset(ds_name, size):
     df = pd.DataFrame(data['test'][:size])
 
     # Display initial info
-    print(df.head())
-    print(df['label'].value_counts())
+    # print(df.head())
+    # print(df['label'].value_counts())
 
     # Mapping labels
     label2id = {'negative': 0, 'positive': 1}
@@ -19,8 +19,8 @@ def process_sentiment_dataset(ds_name, size):
     df['label'] = df['label'].apply(lambda x: id2label[x])
 
     # Display processed data
-    print(df.head())
-    print((df['label'] == 'positive').value_counts())
+    # print(df.head())
+    # print((df['label'] == 'positive').value_counts())
 
     # Convert DataFrame to JSON format
     result = df.to_dict(orient='records')
@@ -32,7 +32,7 @@ def process_qa_dataset(ds_name, size):
     df = pd.DataFrame(data['validation'][:size])
 
     # Display initial info
-    print(df.head())
+    #print(df.head())
 
     # Convert DataFrame to JSON format
     result = df.to_dict(orient='records')
@@ -44,7 +44,7 @@ def process_summarization_dataset(ds_name, ds_version, size):
     df = pd.DataFrame(data['test'][:size])
 
     # Display initial info
-    print(df.head())
+    #print(df.head())
 
     # Convert DataFrame to JSON format
     result = df.to_dict(orient='records')
@@ -67,8 +67,8 @@ def fetch_dataset(task_type, size = dataset_size):
         raise
 
 #js_1 = fetch_dataset('sentiment')
-js_1 = fetch_dataset('qa')
+#js_1 = fetch_dataset('qa')
 # js_1 = fetch_dataset('classification')
 # js_1 = fetch_dataset('summarization')
 
-print(js_1)
+#print(js_1)
