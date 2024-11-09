@@ -2,4 +2,5 @@ requests
 pylint 
 autopep8
 python-dotenv
+together
 flask
