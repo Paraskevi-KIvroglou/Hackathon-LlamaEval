@@ -3,4 +3,8 @@ pylint
 autopep8
 python-dotenv
 together
+regex 
+nltk 
+rouge-score 
+scikit-learn
 flask
