@@ -81,20 +81,23 @@ def evaluate_model(prediction, reference, task_type):
         return em_score, f1
     
     elif task_type.lower() == 'summarization':
-        prediction_list = prediction.split(',').strip()
-        reference_list = reference.split(',').strip()
+        prediction_list = prediction.strip().split(',')
+        reference_list = reference.strip().split(',')
         bleu = calculate_bleu(reference_list, prediction_list)
         rouge_scores = calculate_rouge(prediction, reference)
         print(f"BLEU Score: {bleu:.2f}")
         print(f"ROUGE Scores: {rouge_scores}")
         return bleu, rouge_scorer
-    elif task_type.lower() == 'summarization' or task_type.lower() == 'classification':
+    
+    elif task_type.lower() == 'sentiment' or task_type.lower() == 'classification':
         accuracy, precision, recall, f1_class = classification_metrics(reference, prediction)
         print(f"Accuracy: {accuracy:.2f}, Precision: {precision:.2f}, Recall: {recall:.2f}, F1: {f1_class:.2f}")
         return accuracy, precision, recall, f1_class
 
 # --- Example Usage ---
 
-prediction = "Paris, France"
-reference = "The Eiffel Tower is located in Paris, France."
-evaluate_model(prediction, reference, 'qa')
+# prediction = "Paris, France"
+# reference = "The Eiffel Tower is located in Paris, France."
+prediction = ["Positive", "Negative"]
+reference = ["Positive", "Positive"]
+evaluate_model(prediction, reference, 'sentiment')
