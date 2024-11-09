@@ -7,4 +7,5 @@ regex
 nltk 
 rouge-score 
 scikit-learn
+datasets
 flask

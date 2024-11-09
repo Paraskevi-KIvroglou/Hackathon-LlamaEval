@@ -65,7 +65,7 @@ def classification_metrics(y_true: list, y_pred: list) -> Tuple[float, float, fl
     Calculate accuracy, precision, recall, and F1 for classification tasks (e.g., sentiment analysis).
     """
     accuracy = accuracy_score(y_true, y_pred)
-    precision, recall, f1, _ = precision_recall_fscore_support(y_true, y_pred, average='macro', zero_division=0) # average='weighted' could be used
+    precision, recall, f1, _ = precision_recall_fscore_support(y_true, y_pred, average='weighted', zero_division=0) # average='weighted' could be used
     return accuracy, precision, recall, f1
 
 # main function for model evaluations
@@ -81,8 +81,8 @@ def evaluate_model(prediction, reference, task_type):
         return em_score, f1
     
     elif task_type.lower() == 'summarization':
-        prediction_list = prediction.strip().split(',')
-        reference_list = reference.strip().split(',')
+        prediction_list = prediction
+        reference_list = reference
         bleu = calculate_bleu(reference_list, prediction_list)
         rouge_scores = calculate_rouge(prediction, reference)
         print(f"BLEU Score: {bleu:.2f}")
@@ -90,14 +90,14 @@ def evaluate_model(prediction, reference, task_type):
         return bleu, rouge_scorer
     
     elif task_type.lower() == 'sentiment' or task_type.lower() == 'classification':
-        accuracy, precision, recall, f1_class = classification_metrics(reference, prediction)
+        accuracy, precision, recall, f1_class = classification_metrics([reference], [prediction])
         print(f"Accuracy: {accuracy:.2f}, Precision: {precision:.2f}, Recall: {recall:.2f}, F1: {f1_class:.2f}")
         return accuracy, precision, recall, f1_class
 
 # --- Example Usage ---
 
-prediction = "Paris, France"
-reference = "The Eiffel Tower is located in Paris, France."
+# prediction = "Paris, France"
+# reference = "The Eiffel Tower is located in Paris, France."
 #prediction = ["Positive", "Negative"]
 #reference = ["Positive", "Positive"]
-evaluate_model(prediction, reference, 'summarization')
+#evaluate_model(prediction, reference, 'summarization')
