@@ -8,4 +8,5 @@ nltk
 rouge-score 
 scikit-learn
 datasets
+rouge
 flask
