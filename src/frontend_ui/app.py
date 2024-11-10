@@ -1,6 +1,7 @@
 import streamlit as st
 import data_provider as dp
 import together_api 
+import dataset_descriptions as ds
 
 models_dict = dp.get_Llama_Models()
 names_models = dp.get_Llama_Models().keys()
@@ -42,26 +43,30 @@ model = models_dict[model_name]
 task_name = st.selectbox("Enter Evaluation Task", tasks_names)
 task = tasks_dict[task_name]
 
+datasets= ds.get_datasets()
+dd = ds.get_descriptions()
+
 # evaluation button
 if st.button("Run Evaluation") and model and task:
     st.write("Evaluating selected models on the specified task...")
     
     evaluation_scores = together_api.evaluate_benchmarks(model, task)
     # Panel to show models response and output
+    dataset_name = datasets[task]
+    dataset_description = dd[dataset_name]
+
+    with st.expander(f"Dataset Summary: {dataset_name}"):
+        st.write("## Dataset Description")
+        st.write("---")
+
+        st.write(dataset_description)
+
     with st.expander(f"Model: {model} - Task: '{task}'"):  
         # Score Board Panel
         st.write("## Evaluation Scores")
         st.write("---")
     
         # scores, get them from the API response
-        scores = dp.get_metrics_to_print(task=task, results= evaluation_scores)
+        scores = dp.get_metrics_to_print(task=task, results = evaluation_scores)
+        
         st.table(scores)
-    
-    #     # Display
-    # score_board = {
-    #     "Model": list(scores.keys()),
-    #     "Score": list(scores.values())
-    # }
-    
-    # # score table
-    # st.table(score_board)
