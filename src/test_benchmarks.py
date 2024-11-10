@@ -76,8 +76,8 @@ def evaluate_model(prediction, reference, task_type):
     if task_type.lower() == 'qa':
         em_score = exact_match_score(prediction, reference)
         f1 = f1_score(prediction, reference)
-        print(f"Exact Match Score: {em_score}")
-        print(f"F1 Score: {f1:.2f}")
+        # print(f"Exact Match Score: {em_score}")
+        # print(f"F1 Score: {f1:.2f}")
         return em_score, f1
     
     elif task_type.lower() == 'summarization':
@@ -85,13 +85,13 @@ def evaluate_model(prediction, reference, task_type):
         reference_list = reference
         bleu = calculate_bleu(reference_list, prediction_list)
         rouge_scores = calculate_rouge(prediction, reference)
-        print(f"BLEU Score: {bleu:.2f}")
-        print(f"ROUGE Scores: {rouge_scores}")
+        # print(f"BLEU Score: {bleu:.2f}")
+        # print(f"ROUGE Scores: {rouge_scores}")
         return bleu, rouge_scorer
     
     elif task_type.lower() == 'sentiment' or task_type.lower() == 'classification':
         accuracy, precision, recall, f1_class = classification_metrics([reference], [prediction])
-        print(f"Accuracy: {accuracy:.2f}, Precision: {precision:.2f}, Recall: {recall:.2f}, F1: {f1_class:.2f}")
+        # print(f"Accuracy: {accuracy:.2f}, Precision: {precision:.2f}, Recall: {recall:.2f}, F1: {f1_class:.2f}")
         return accuracy, precision, recall, f1_class
 
 # --- Example Usage ---

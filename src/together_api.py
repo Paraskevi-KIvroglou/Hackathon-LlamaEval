@@ -111,5 +111,7 @@ def main():
         #evaluations.append(evaluation)
         final_evaluation[0] += evaluation[0]
         final_evaluation[1] += evaluation[1]
-    print(final_evaluation)
+    
+    print(f"Exact Match Score: {final_evaluation[0]} F1 Score: {final_evaluation[1]:.2f}")
+    
 main()
