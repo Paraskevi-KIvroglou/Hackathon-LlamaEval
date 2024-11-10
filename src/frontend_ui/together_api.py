@@ -154,6 +154,7 @@ def evaluate_benchmarks(model, task):
                 evaluation_i = Decimal(evaluation[i]) / Decimal(len(results))
                 final_evaluation[i] += evaluation_i
 
-    benchmarks.print_evaluations(final_evaluation, task_type=task)
+    #benchmarks.print_evaluations(final_evaluation, task_type=task)
+    return final_evaluation
 
-evaluate_benchmarks(model="meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo", task='sentiment')
+#evaluate_benchmarks(model="meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo", task='sentiment')

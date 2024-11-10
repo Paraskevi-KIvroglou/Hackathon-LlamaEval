@@ -102,6 +102,7 @@ def evaluate_model(prediction, reference, task_type):
             # print(f"  Precision: {score.precision:.4f}")
             # print(f"  Recall: {score.recall:.4f}")
         result = (bleu, ) + tuple(item for item in scores)
+        print(result)
         return result
     
     elif task_type.lower() == 'sentiment' or task_type.lower() == 'classification':
@@ -125,4 +126,4 @@ def print_evaluations(results, task_type):
     elif task_type.lower() == 'summarization':
         print(f"BLEU Score: {results[0]:.2f}", f"ROUGE Score F1: {results[1]:.2f}", f"ROUGE Score Precision: {results[2]:.2f}", f"ROUGE Score Recall: {results[3]:.2f}")
     elif task_type.lower() == 'sentiment' or task_type.lower() == 'classification':
-        print(f"Accuracy: {results[0]:.2f}, ")# Precision: {results[1]:.2f}, Recall: {results[2]:.2f}, F1: {results[3]:.2f}
+        print(f"Accuracy: {results[0]:.2f}, ") # Precision: {results[1]:.2f}, Recall: {results[2]:.2f}, F1: {results[3]:.2f}
