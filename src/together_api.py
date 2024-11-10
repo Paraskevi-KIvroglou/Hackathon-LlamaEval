@@ -3,11 +3,11 @@ import requests
 import together
 import json, time
 from dotenv import load_dotenv
-
 import test_benchmarks as benchmarks
 import fetch_dataset as fetch
 import datasets
-
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
+import nltk
 import pandas as pd
 from decimal import Decimal
 
@@ -105,6 +105,21 @@ def evaluate_single_response(prompt, expected):
     evaluation = evaluate_response(response=response, reference=expected,task="summarization")
     print(evaluation)
 
+def process_output_for_sentiment_analysis(output):
+    # Download VADER's lexicon
+    nltk.download("vader_lexicon")
+    sia = SentimentIntensityAnalyzer()
+
+    # Example LLM output
+    text_generated_by_llm = output
+
+    # Get VADER sentiment scores
+    sentiment_scores = sia.polarity_scores(text_generated_by_llm)
+    print(sentiment_scores) 
+    compound_score = sentiment_scores["compound"] 
+    score = 'positive' if compound_score > 0 else 'negative'
+    return score
+
 def evaluate_benchmarks(model, task):
     dataset, json_dataset = fetch.fetch_dataset(task)
 
@@ -115,26 +130,30 @@ def evaluate_benchmarks(model, task):
     first_loop = True
     for i in range(len(results)):
         if task.lower() == "qa":
+            model_output = results[i]['output']['choices'][0]['text']
             reference=dataset.iloc[i]['answers']['text'][0]
         elif task.lower() == 'summarization':
+            model_output = results[i]['output']['choices'][0]['text']
             reference=dataset.iloc[i]['highlights']
         elif task.lower() == 'sentiment' or task.lower() == 'classification':
-            reference=dataset.iloc[i]['text']
-
-        model_output = results[i]['output']['choices'][0]['text']
+            model_output = process_output_for_sentiment_analysis(results[i]['output']['choices'][0]['text'])
+            reference=dataset.iloc[i]['label']
+        
         print(model_output)
 
-        evaluation = benchmarks.evaluate_model(prediction=results[i]['output']['choices'][0]['text'], reference=reference, task_type=task)
+        evaluation = benchmarks.evaluate_model(prediction=model_output, reference=reference, task_type=task)
         evaluations.append(evaluation)
+        print(len(evaluations))
         if first_loop == True:
             for i in range(len(evaluation)):
-                evaluation_i = Decimal(evaluation[i]) * Decimal(1 / len(evaluations))
+                evaluation_i = Decimal(evaluation[i]) / Decimal(len(results))
                 final_evaluation.append(evaluation_i)
             first_loop = False
         else:
             for i in range(len(evaluation)):
-                evaluation_i = Decimal(evaluation[i]) * Decimal(1 / len(evaluations))
-                final_evaluation[i] += evaluation_i  
+                evaluation_i = Decimal(evaluation[i]) / Decimal(len(results))
+                final_evaluation[i] += evaluation_i
+
     benchmarks.print_evaluations(final_evaluation, task_type=task)
 
 evaluate_benchmarks(model="meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo", task='sentiment')

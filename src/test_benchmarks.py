@@ -66,8 +66,8 @@ def classification_metrics(y_true: list, y_pred: list) -> Tuple[float, float, fl
     Calculate accuracy, precision, recall, and F1 for classification tasks (e.g., sentiment analysis).
     """
     accuracy = accuracy_score(y_true, y_pred)
-    precision, recall, f1, _ = precision_recall_fscore_support(y_true, y_pred, average='weighted', zero_division=0) # average='weighted' could be used
-    return accuracy, precision, recall, f1
+    #precision, recall, f1, _ = precision_recall_fscore_support(y_true, y_pred, zero_division=0) # average='weighted' could be used
+    return accuracy
 
 # main function for model evaluations
 def evaluate_model(prediction, reference, task_type):
@@ -105,9 +105,10 @@ def evaluate_model(prediction, reference, task_type):
         return result
     
     elif task_type.lower() == 'sentiment' or task_type.lower() == 'classification':
-        accuracy, precision, recall, f1_class = classification_metrics([reference], [prediction])
-        # print(f"Accuracy: {accuracy:.2f}, Precision: {precision:.2f}, Recall: {recall:.2f}, F1: {f1_class:.2f}")
-        return accuracy, precision, recall, f1_class
+        print([reference], [prediction])
+        accuracy = classification_metrics([reference], [prediction]) #precision, recall, f1_class
+        print(accuracy)
+        return (accuracy, )   #, precision, recall, f1_class
 
 # --- Example Usage ---
 
@@ -124,4 +125,4 @@ def print_evaluations(results, task_type):
     elif task_type.lower() == 'summarization':
         print(f"BLEU Score: {results[0]:.2f}", f"ROUGE Score F1: {results[1]:.2f}", f"ROUGE Score Precision: {results[2]:.2f}", f"ROUGE Score Recall: {results[3]:.2f}")
     elif task_type.lower() == 'sentiment' or task_type.lower() == 'classification':
-        print(f"Accuracy: {results[0]:.2f}, Precision: {results[1]:.2f}, Recall: {results[2]:.2f}, F1: {results[3]:.2f}")
+        print(f"Accuracy: {results[0]:.2f}, ")# Precision: {results[1]:.2f}, Recall: {results[2]:.2f}, F1: {results[3]:.2f}
