@@ -10,3 +10,4 @@ scikit-learn
 datasets
 rouge
 flask
+streamlit==1.40.0
