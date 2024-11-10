@@ -35,7 +35,7 @@ Installation
     bash
     streamlit run app.py
 
-Open your web browser and navigate to http://localhost:5000.
+Open your web browser and navigate to http://localhost:8501.
 Select a Llama model, choose a benchmark task, and input your prompt.
 View the results and performance metrics on the dashboard.
 
