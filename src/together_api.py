@@ -9,6 +9,7 @@ import fetch_dataset as fetch
 import datasets
 
 import pandas as pd
+from decimal import Decimal
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -27,7 +28,7 @@ def call_API_from_client(model, prompt):
     print(response.choices[0].message.content)
     return response.choices[0].message.content
 
-def call_API_request(model, prompt):
+def call_API_request(model, prompt, tokens = 128):
     url = "https://api.together.xyz/inference"
     headers = {
         "Authorization": f"Bearer {api_key}",
@@ -36,7 +37,7 @@ def call_API_request(model, prompt):
     payload = {
         "model": model,
         "prompt" : prompt,
-        "max_tokens": 128,
+        "max_tokens": tokens,
         "temperature": 0.7,
         "top_p": 0.7,
         "top_k": 50,
@@ -63,7 +64,7 @@ def pretty_print_json(json_object):
     # Print the formatted JSON string
     print(formatted_json)
 
-def run_batches(dataset, model):
+def run_batches(dataset, model, task):
 # Process items in smaller batches
     batch_size = 100  # Adjust this based on your needs
     results = []
@@ -72,7 +73,13 @@ def run_batches(dataset, model):
         batch = dataset.iloc[i:i+batch_size]
         
         with ThreadPoolExecutor(max_workers=5) as executor:  # Reduced max_workers
-            futures = [executor.submit(call_API_request, model, f"{row['context']} {row['question']}") for _, row in batch.iterrows()]
+            if task.lower() == "qa":
+                futures = [executor.submit(call_API_request, model, f"{row['context']} {row['question']}") for _, row in batch.iterrows()]
+            elif task.lower() == 'summarization':
+                futures = [executor.submit(call_API_request, model, f"Can you summarize the text? {row['article']}") for _, row in batch.iterrows()]
+            elif task.lower() == 'sentiment' or task.lower() == 'classification':
+                futures = [executor.submit(call_API_request, model, f"Can you evaluate if the text is positive or negative? {row['text']}", 5) for _, row in batch.iterrows()]
+            
             for future in as_completed(futures):
                 result = future.result()
                 if result is not None:
@@ -93,25 +100,41 @@ def evaluate_response(response, reference, task):
     evaluation = benchmarks.evaluate_model(response, reference, task)
     return evaluation
 
-def previous_main(prompt, expected):
+def evaluate_single_response(prompt, expected):
     response = call_API_from_client("meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo", prompt=prompt)
     evaluation = evaluate_response(response=response, reference=expected,task="summarization")
     print(evaluation)
 
-def main():
-    dataset, json_dataset = fetch.fetch_dataset('qa')
+def evaluate_benchmarks(model, task):
+    dataset, json_dataset = fetch.fetch_dataset(task)
 
-    results = run_batches(dataset=dataset, model = "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo")
+    results = run_batches(dataset=dataset, model = model, task= task)
 
     evaluations = []
-    final_evaluation = [0,0]
+    final_evaluation = []
+    first_loop = True
     for i in range(len(results)):
-        evaluation = benchmarks.evaluate_model(prediction=results[i]['output']['choices'][0]['text'], reference=dataset.iloc[i]['answers']['text'][0], task_type="qa")
-        evaluation = (evaluation[0] * 1 / len(results), evaluation[1] * 1 / len(results))
-        #evaluations.append(evaluation)
-        final_evaluation[0] += evaluation[0]
-        final_evaluation[1] += evaluation[1]
-    
-    print(f"Exact Match Score: {final_evaluation[0]} F1 Score: {final_evaluation[1]:.2f}")
-    
-main()
+        if task.lower() == "qa":
+            reference=dataset.iloc[i]['answers']['text'][0]
+        elif task.lower() == 'summarization':
+            reference=dataset.iloc[i]['highlights']
+        elif task.lower() == 'sentiment' or task.lower() == 'classification':
+            reference=dataset.iloc[i]['text']
+
+        model_output = results[i]['output']['choices'][0]['text']
+        print(model_output)
+
+        evaluation = benchmarks.evaluate_model(prediction=results[i]['output']['choices'][0]['text'], reference=reference, task_type=task)
+        evaluations.append(evaluation)
+        if first_loop == True:
+            for i in range(len(evaluation)):
+                evaluation_i = Decimal(evaluation[i]) * Decimal(1 / len(evaluations))
+                final_evaluation.append(evaluation_i)
+            first_loop = False
+        else:
+            for i in range(len(evaluation)):
+                evaluation_i = Decimal(evaluation[i]) * Decimal(1 / len(evaluations))
+                final_evaluation[i] += evaluation_i  
+    benchmarks.print_evaluations(final_evaluation, task_type=task)
+
+evaluate_benchmarks(model="meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo", task='sentiment')

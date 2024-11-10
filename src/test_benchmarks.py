@@ -2,6 +2,7 @@ import re
 from typing import Tuple
 from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
 from rouge_score import rouge_scorer
+from rouge import Rouge
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support
 
 # --- Normalization Function ---
@@ -55,8 +56,8 @@ def calculate_rouge(reference: str, candidate: str) -> dict:
     """
     Calculate ROUGE-1 and ROUGE-L scores between reference and candidate summaries.
     """
-    scorer = rouge_scorer.RougeScorer(['rouge1', 'rougeL'], use_stemmer=True)
-    return scorer.score(reference, candidate)
+    scorer = Rouge()
+    return scorer.get_scores(reference, candidate)[0]
 
 # --- Accuracy, Precision, Recall, and F1 for Classification ---
 
@@ -87,7 +88,21 @@ def evaluate_model(prediction, reference, task_type):
         rouge_scores = calculate_rouge(prediction, reference)
         # print(f"BLEU Score: {bleu:.2f}")
         # print(f"ROUGE Scores: {rouge_scores}")
-        return bleu, rouge_scorer
+        scores = []
+        for metric, values in rouge_scores.items():
+            print(f"{metric}:")
+            # scores.append(score.precision)
+            # scores.append(score.recall)
+            # scores.append(score.fmeasure)
+            # Print the scores
+            for key, value in values.items():
+                print(f"  {key}: {value:.4f}")
+                scores.append(value)
+            # print(f"  F1-score: {score.fmeasure:.4f}")
+            # print(f"  Precision: {score.precision:.4f}")
+            # print(f"  Recall: {score.recall:.4f}")
+        result = (bleu, ) + tuple(item for item in scores)
+        return result
     
     elif task_type.lower() == 'sentiment' or task_type.lower() == 'classification':
         accuracy, precision, recall, f1_class = classification_metrics([reference], [prediction])
@@ -101,3 +116,12 @@ def evaluate_model(prediction, reference, task_type):
 #prediction = ["Positive", "Negative"]
 #reference = ["Positive", "Positive"]
 #evaluate_model(prediction, reference, 'summarization')
+
+def print_evaluations(results, task_type):
+
+    if task_type.lower() == 'qa':
+        print(f"Exact Match Score: {results[0]}", f"F1 Score: {results[1]:.2f}")
+    elif task_type.lower() == 'summarization':
+        print(f"BLEU Score: {results[0]:.2f}", f"ROUGE Score F1: {results[1]:.2f}", f"ROUGE Score Precision: {results[2]:.2f}", f"ROUGE Score Recall: {results[3]:.2f}")
+    elif task_type.lower() == 'sentiment' or task_type.lower() == 'classification':
+        print(f"Accuracy: {results[0]:.2f}, Precision: {results[1]:.2f}, Recall: {results[2]:.2f}, F1: {results[3]:.2f}")
